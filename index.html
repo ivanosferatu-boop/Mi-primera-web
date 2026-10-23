@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Patricio - Mi Primera Web</title>
 
   <style>
@@ -66,6 +67,23 @@ input[type="text"] {
     footer {
       text-align: center;
     }
+#tarjeta {
+  width: 90%;          /* En celulares usará el 90% del ancho disponible */
+  margin: 15px auto;   /* Menos margen vertical */
+  padding: 15px;       /* Menos relleno interno */
+}
+
+.boton, input[type="text"] {
+  width: 100%;
+  box-sizing: border-border; /* Asegura que el padding no desborde el ancho */
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+
   </style>
 
 </head>
