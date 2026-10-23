@@ -160,6 +160,12 @@ img {
 
       <button class="boton" onclick="mostrarMensaje()">¡Haz clic para ver un saludo!</button>
       <p id="mensaje-dinamico">Esperando que presiones el botón...</p>
+
+<hr style="margin: 20px 0; border: 0.5px solid #eee;">
+<h3>Dato Curioso del Día (Vía API)</h3>
+<button class="boton" onclick="obtenerDatoCurioso()">Cargar Dato Aleatorio</button>
+<p id="texto-api" style="margin-top: 10px; font-style: italic; color: #333;">Haz clic en el botón para consultar el servidor...</p>
+
     </div>
   </main>
 
@@ -231,6 +237,25 @@ function agregarTarea() {
 
 // Llamamos a la función inicial
 mostrarTareas();
+
+async function obtenerDatoCurioso() {
+  let elementoTexto = document.getElementById("texto-api");
+  elementoTexto.textContent = "Cargando datos desde el servidor...";
+  elementoTexto.style.color = "gray";
+
+  try {
+    // Petición HTTP GET a la API
+    let respuesta = await fetch("https://catfact.ninja/fact");
+    let datos = await respuesta.json();
+
+    // Mostramos el dato recibido del servidor en pantalla
+    elementoTexto.textContent = "💡 " + datos.fact;
+    elementoTexto.style.color = "#0066cc";
+  } catch (error) {
+    elementoTexto.textContent = "Error al conectar con el servidor.";
+    elementoTexto.style.color = "red";
+  }
+}
 
   </script>
 
