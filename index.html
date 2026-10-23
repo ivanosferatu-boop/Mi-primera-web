@@ -133,6 +133,13 @@ img {
       <h3>Soporte Técnico</h3>
       <p>Mantenimiento y optimización de sistemas.</p>
     </div>
+<h3>Agregar Nuevo Pendiente</h3>
+<div style="margin-bottom: 15px;">
+  <input type="text" id="nueva-tarea" placeholder="Escribe una tarea o meta...">
+  <button class="boton" onclick="agregarTarea()">Agregar Tarea</button>
+</div>
+<ul id="lista-tareas"></ul>
+
   </div>
 </section>
 
@@ -197,6 +204,33 @@ function cargarHabilidades() {
 
 // Ejecutamos la función apenas cargue la página
 cargarHabilidades();
+
+let tareas = ["Revisar configuración de router", "Aprender Backend con Node.js"];
+
+function mostrarTareas() {
+  let contenedorTareas = document.getElementById("lista-tareas");
+  contenedorTareas.innerHTML = "";
+
+  tareas.forEach(function(tarea) {
+    contenedorTareas.innerHTML += "<li>" + tarea + "</li>";
+  });
+}
+
+function agregarTarea() {
+  let inputTarea = document.getElementById("nueva-tarea");
+  let textoTarea = inputTarea.value;
+
+  if (textoTarea === "") {
+    alert("Por favor escribe una tarea antes de agregar.");
+  } else {
+    tareas.push(textoTarea); // Agrega la nueva tarea al arreglo
+    inputTarea.value = "";   // Limpia el cuadro de texto
+    mostrarTareas();         // Actualiza la lista en pantalla
+  }
+}
+
+// Llamamos a la función inicial
+mostrarTareas();
 
   </script>
 
