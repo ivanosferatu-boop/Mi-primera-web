@@ -2,6 +2,7 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>Patricio - Mi Primera Web</title>
 
   <style>
@@ -67,6 +68,7 @@ input[type="text"] {
     footer {
       text-align: center;
     }
+
 #tarjeta {
   width: 90%;          /* En celulares usará el 90% del ancho disponible */
   margin: 15px auto;   /* Menos margen vertical */
@@ -83,6 +85,26 @@ img {
   height: auto;
 }
 
+#servicios {
+  max-width: 800px;
+  margin: 30px auto;
+  text-align: center;
+}
+
+.galeria-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* 3 columnas en PC */
+  gap: 15px;
+  grid-template-columns: 1fr; /* 1 columna en celulares */
+}
+
+.caja-servicio {
+  background-color: white;
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid #cccccc;
+}
+
 
   </style>
 
@@ -95,6 +117,25 @@ img {
 
   <main>
     <div id="tarjeta">
+
+<section id="servicios">
+  <h2>Mis Servicios</h2>
+  <div class="galeria-grid">
+    <div class="caja-servicio">
+      <h3>Redes & Telecom</h3>
+      <p>Diseño e implementación de infraestructura de red.</p>
+    </div>
+    <div class="caja-servicio">
+      <h3>Desarrollo Web</h3>
+      <p>Creación de sitios web modernos e interactivos.</p>
+    </div>
+    <div class="caja-servicio">
+      <h3>Soporte Técnico</h3>
+      <p>Mantenimiento y optimización de sistemas.</p>
+    </div>
+  </div>
+</section>
+
       <p class="descripcion">Soy Ingeniero en Redes y Telecomunicaciones</p>
       <p class="descripcion">Por adquirir conocimientos</p>
 	<p class="descripcion">Volverme un capo en la creación de páginas Web</p>
