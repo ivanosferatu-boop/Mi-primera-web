@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Patricio - Mi Primera Web</title>
+
+  <style>
+    body {
+      background-color: #eef2f5;
+      font-family: Arial, sans-serif;
+    }
+
+    #bienvenida {
+      color: navy;
+      text-align: center;
+    }
+
+    .descripcion {
+      color: #555555;
+      font-style: italic;
+    }
+
+    .lista-habilidades {
+      color: darkblue;
+    }
+
+    #tarjeta {
+      background-color: white;
+      max-width: 500px;
+      margin: 30px auto;
+      padding: 20px;
+      border-radius: 10px;
+      border: 1px solid #cccccc;
+    }
+
+    .boton {
+      display: inline-block;
+      background-color: #0066cc;
+      color: white;
+      padding: 10px 20px;
+      text-decoration: none;
+      border-radius: 5px;
+      border: none;
+      cursor: pointer;
+    }
+
+    .boton:hover {
+      background-color: #004499;
+    }
+
+    .contenedor-media {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 15px;
+    }
+
+input[type="text"] {
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  margin-bottom: 10px;
+  width: 80%;
+}
+
+    footer {
+      text-align: center;
+    }
+  </style>
+
+</head>
+<body>
+
+  <header>
+    <h1 id="bienvenida">Bienvenido</h1>
+  </header>
+
+  <main>
+    <div id="tarjeta">
+      <p class="descripcion">Soy Ingeniero en Redes y Telecomunicaciones</p>
+      <p class="descripcion">Por adquirir conocimientos</p>
+	<p class="descripcion">Volverme un capo en la creación de páginas Web</p>
+
+      <h2>Mis Habilidades</h2>
+      <ul class="lista-habilidades">
+        <li>Crear páginas web</li>
+        <li>Publicar la página web en internet</li>
+        <li>Aprender toda la estructura de una página web</li>
+      </ul>
+
+      <div class="contenedor-media">
+        <a class="boton" href="https://www.netacad.com/es/">Mi web favorita</a>
+        <img src="https://picsum.photos/300/200" alt="Imagen de prueba">
+      </div>
+
+	<input type="text" id="nombre-usuario" placeholder="Ingresa tu nombre">
+
+      <button class="boton" onclick="mostrarMensaje()">¡Haz clic para ver un saludo!</button>
+      <p id="mensaje-dinamico">Esperando que presiones el botón...</p>
+    </div>
+  </main>
+
+  <footer>
+	
+	
+    <p class="footer-text">© 🦆 2026 - Desarrollado por Patricio Hurtado</p>
+ 
+</footer>
+    
+  
+
+  <script>
+   function mostrarMensaje() {
+  let nombre = document.getElementById("nombre-usuario").value;
+
+  if (nombre === "") {
+    document.getElementById("mensaje-dinamico").textContent = "Por favor, ingresa tu nombre primero.";
+    document.getElementById("mensaje-dinamico").style.color = "red";
+  } else {
+    document.getElementById("mensaje-dinamico").textContent = "¡Hola " + nombre + "! Gracias por visitar mi página.";
+    document.getElementById("mensaje-dinamico").style.color = "blue";
+  }
+}
+  </script>
+
+</body>
+</html>
