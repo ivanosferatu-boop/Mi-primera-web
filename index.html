@@ -141,11 +141,8 @@ img {
 	<p class="descripcion">Volverme un capo en la creación de páginas Web</p>
 
       <h2>Mis Habilidades</h2>
-      <ul class="lista-habilidades">
-        <li>Crear páginas web</li>
-        <li>Publicar la página web en internet</li>
-        <li>Aprender toda la estructura de una página web</li>
-      </ul>
+      <ul id="lista-dinamica" class="lista-habilidades"></ul>
+        
 
       <div class="contenedor-media">
         <a class="boton" href="https://www.netacad.com/es/">Mi web favorita</a>
@@ -180,6 +177,27 @@ img {
     document.getElementById("mensaje-dinamico").style.color = "blue";
   }
 }
+
+let misHabilidades = [
+  "Crear páginas web con HTML5 y CSS3",
+  "Publicar proyectos en internet con GitHub Pages",
+  "Diseño Adaptativo para celulares (Responsive Design)",
+  "Maquetación avanzada con Flexbox y CSS Grid",
+  "Interactividad y manipulación del DOM con JavaScript"
+];
+
+function cargarHabilidades() {
+  let contenedorLista = document.getElementById("lista-dinamica");
+  contenedorLista.innerHTML = ""; // Limpia la lista
+
+  misHabilidades.forEach(function(habilidad) {
+    contenedorLista.innerHTML += "<li>" + habilidad + "</li>";
+  });
+}
+
+// Ejecutamos la función apenas cargue la página
+cargarHabilidades();
+
   </script>
 
 </body>
