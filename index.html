@@ -1,175 +1,263 @@
-import { useState, useEffect } from 'react';
-import { supabase } from '../lib/supabase';
-import Link from 'next/link';
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-export default function Home() {
-  const [campeonatos, setCampeonatos] = useState([]);
-  const [campeonatoSeleccionado, setCampeonatoSeleccionado] = useState(null);
-  const [posiciones, setPosiciones] = useState([]);
-  const [partidos, setPartidos] = useState([]);
-  const [goleadores, setGoleadores] = useState([]);
+  <title>Patricio - Mi Primera Web</title>
 
-  useEffect(() => {
-    cargarCampeonatos();
-  }, []);
-
-  useEffect(() => {
-    if (campeonatoSeleccionado) {
-      cargarDatosCampeonato(campeonatoSeleccionado);
+  <style>
+    body {
+      background-color: #eef2f5;
+      font-family: Arial, sans-serif;
     }
-  }, [campeonatoSeleccionado]);
 
-  async function cargarCampeonatos() {
-    const { data } = await supabase.from('campeonatos').select('*');
-    if (data && data.length > 0) {
-      setCampeonatos(data);
-      setCampeonatoSeleccionado(data[0].id);
+    #bienvenida {
+      color: navy;
+      text-align: center;
     }
-  }
 
-  async function cargarDatosCampeonato(campId) {
-    // 1. Cargar Equipos para Posiciones
-    const { data: equipos } = await supabase.from('equipos').select('*').eq('campeonato_id', campId);
-    
-    // 2. Cargar Partidos
-    const { data: parts } = await supabase.from('partidos').select('*, local:equipo_local_id(nombre, escudo_url), visitante:equipo_visitante_id(nombre, escudo_url)').eq('campeonato_id', campId);
-    setPartidos(parts || []);
+    .descripcion {
+      color: #555555;
+      font-style: italic;
+    }
 
-    // Calcular Tabla de Posiciones simple basada en partidos finalizados
-    let tabla = equipos?.map(eq => ({ ...eq, pj: 0, pg: 0, pe: 0, pp: 0, gf: 0, gc: 0, pts: 0 })) || [];
-    
-    parts?.filter(p => p.estado === 'FINALIZADO').forEach(p => {
-      const loc = tabla.find(e => e.id === p.equipo_local_id);
-      const vis = tabla.find(e => e.id === p.equipo_visitante_id);
-      if (loc && vis) {
-        loc.pj++; vis.pj++;
-        loc.gf += p.goles_local; loc.gc += p.goles_visitante;
-        vis.gf += p.goles_visitante; vis.gc += p.goles_local;
+    .lista-habilidades {
+      color: darkblue;
+    }
 
-        if (p.goles_local > p.goles_visitante) {
-          loc.pg++; loc.pts += 3; vis.pp++;
-        } else if (p.goles_local < p.goles_visitante) {
-          vis.pg++; vis.pts += 3; loc.pp++;
-        } else {
-          loc.pe++; loc.pts += 1; vis.pe++; vis.pts += 1;
-        }
-      }
-    });
+    #tarjeta {
+      background-color: white;
+      max-width: 500px;
+      margin: 30px auto;
+      padding: 20px;
+      border-radius: 10px;
+      border: 1px solid #cccccc;
+    }
 
-    tabla.sort((a, b) => b.pts - a.pts || (b.gf - b.gc) - (a.gf - a.gc));
-    setPosiciones(tabla);
+    .boton {
+      display: inline-block;
+      background-color: #0066cc;
+      color: white;
+      padding: 10px 20px;
+      text-decoration: none;
+      border-radius: 5px;
+      border: none;
+      cursor: pointer;
+    }
 
-    // 3. Cargar Goleadores
-    const { data: inc } = await supabase.from('incidencias').select('jugador_id, jugadores(nombre, equipos(nombre)), tipo').eq('tipo', 'GOL');
-    const golesMap = {};
-    inc?.forEach(i => {
-      const nom = i.jugadores?.nombre;
-      const eq = i.jugadores?.equipos?.nombre;
-      if (nom) {
-        golesMap[nom] = { goles: (golesMap[nom]?.goles || 0) + 1, equipo: eq };
-      }
-    });
-    const listaGoles = Object.entries(golesMap).map(([nombre, datos]) => ({ nombre, ...datos })).sort((a, b) => b.goles - a.goles);
-    setGoleadores(listaGoles);
-  }
+    .boton:hover {
+      background-color: #004499;
+    }
 
-  const campActual = campeonatos.find(c => c.id === campeonatoSeleccionado);
+    .contenedor-media {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 15px;
+    }
 
-  return (
-    <div className="min-h-screen bg-gray-100 p-6">
-      <header className="flex justify-between items-center bg-white p-4 shadow rounded-lg mb-6">
-        <div className="flex items-center gap-4">
-          {campActual?.logo_url && <img src={campActual.logo_url} alt="Logo" className="w-12 h-12 object-contain" />}
-          <h1 className="text-2xl font-bold text-gray-800">{campActual ? campActual.nombre : 'Sistema de Campeonatos'}</h1>
-        </div>
-        <div className="flex gap-3">
-          <select 
-            className="border p-2 rounded"
-            value={campeonatoSeleccionado || ''}
-            onChange={(e) => setCampeonatoSeleccionado(e.target.value)}
-          >
-            {campeonatos.map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}
-          </select>
-          <Link href="/admin/login" className="bg-blue-600 text-white px-4 py-2 rounded font-semibold hover:bg-blue-700">
-            Administración
-          </Link>
-        </div>
-      </header>
-
-      {/* TABLA DE POSICIONES EN PRIMER PLANO */}
-      <section className="bg-white p-6 rounded-lg shadow mb-6">
-        <h2 className="text-xl font-bold mb-4 text-blue-700">🏆 Tabla de Posiciones</h2>
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-gray-200 text-gray-700">
-                <th className="p-3">Pos</th>
-                <th className="p-3">Equipo</th>
-                <th className="p-3">PJ</th>
-                <th className="p-3">PG</th>
-                <th className="p-3">PE</th>
-                <th className="p-3">PP</th>
-                <th className="p-3">GF</th>
-                <th className="p-3">GC</th>
-                <th className="p-3">GD</th>
-                <th className="p-3 font-bold">PTS</th>
-              </tr>
-            </thead>
-            <tbody>
-              {posiciones.map((eq, index) => (
-                <tr key={eq.id} className="border-b hover:bg-gray-50">
-                  <td className="p-3 font-bold">{index + 1}</td>
-                  <td className="p-3 flex items-center gap-2">
-                    {eq.escudo_url && <img src={eq.escudo_url} className="w-6 h-6 object-contain" />}
-                    {eq.nombre}
-                  </td>
-                  <td className="p-3">{eq.pj}</td>
-                  <td className="p-3">{eq.pg}</td>
-                  <td className="p-3">{eq.pe}</td>
-                  <td className="p-3">{eq.pp}</td>
-                  <td className="p-3">{eq.gf}</td>
-                  <td className="p-3">{eq.gc}</td>
-                  <td className="p-3">{eq.gf - eq.gc}</td>
-                  <td className="p-3 font-bold text-blue-600">{eq.pts}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      {/* ESTADÍSTICAS Y PARTIDOS */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h2 className="text-xl font-bold mb-4 text-green-700">⚽ Goleadores</h2>
-          <ul>
-            {goleadores.map((g, i) => (
-              <li key={i} className="flex justify-between border-b py-2 text-sm">
-                <span>{i + 1}. {g.nombre} <span className="text-gray-500">({g.equipo})</span></span>
-                <span className="font-bold">{g.goles} goles</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h2 className="text-xl font-bold mb-4 text-purple-700">📅 Próximos Partidos / Resultados</h2>
-          <ul>
-            {partidos.map((p) => (
-              <li key={p.id} className="border-b py-2 text-sm flex flex-col gap-1">
-                <div className="flex justify-between font-semibold">
-                  <span>{p.local?.nombre} vs {p.visitante?.nombre}</span>
-                  <span>{p.estado === 'FINALIZADO' ? `${p.goles_local} - ${p.goles_visitante}` : p.estado}</span>
-                </div>
-                <div className="text-xs text-gray-500 flex justify-between">
-                  <span>🏟️ {p.estadio || 'Por definir'} | ⏰ {p.fecha_hora ? new Date(p.fecha_hora).toLocaleString() : 'Por programar'}</span>
-                  {p.estado === 'APLAZADO' && <span className="text-red-500 font-bold">Motivo: {p.motivo_alaplazar}</span>}
-                </div>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
-    </div>
-  );
+input[type="text"] {
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  margin-bottom: 10px;
+  width: 80%;
 }
+
+    footer {
+      text-align: center;
+    }
+
+#tarjeta {
+  width: 90%;          /* En celulares usará el 90% del ancho disponible */
+  margin: 15px auto;   /* Menos margen vertical */
+  padding: 15px;       /* Menos relleno interno */
+}
+
+.boton, input[type="text"] {
+  width: 100%;
+  box-sizing: border-border; /* Asegura que el padding no desborde el ancho */
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+#servicios {
+  max-width: 800px;
+  margin: 30px auto;
+  text-align: center;
+}
+
+.galeria-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* 3 columnas en PC */
+  gap: 15px;
+  grid-template-columns: 1fr; /* 1 columna en celulares */
+}
+
+.caja-servicio {
+  background-color: white;
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid #cccccc;
+}
+
+
+  </style>
+
+</head>
+<body>
+
+  <header>
+    <h1 id="bienvenida">Bienvenido</h1>
+  </header>
+
+  <main>
+    <div id="tarjeta">
+
+<section id="servicios">
+  <h2>Mis Servicios</h2>
+  <div class="galeria-grid">
+    <div class="caja-servicio">
+      <h3>Redes & Telecom</h3>
+      <p>Diseño e implementación de infraestructura de red.</p>
+    </div>
+    <div class="caja-servicio">
+      <h3>Desarrollo Web</h3>
+      <p>Creación de sitios web modernos e interactivos.</p>
+    </div>
+    <div class="caja-servicio">
+      <h3>Soporte Técnico</h3>
+      <p>Mantenimiento y optimización de sistemas.</p>
+    </div>
+<h3>Agregar Nuevo Pendiente</h3>
+<div style="margin-bottom: 15px;">
+  <input type="text" id="nueva-tarea" placeholder="Escribe una tarea o meta...">
+  <button class="boton" onclick="agregarTarea()">Agregar Tarea</button>
+</div>
+<ul id="lista-tareas"></ul>
+
+  </div>
+</section>
+
+      <p class="descripcion">Soy Ingeniero en Redes y Telecomunicaciones</p>
+      <p class="descripcion">Por adquirir conocimientos</p>
+	<p class="descripcion">Volverme un capo en la creación de páginas Web</p>
+
+      <h2>Mis Habilidades</h2>
+      <ul id="lista-dinamica" class="lista-habilidades"></ul>
+        
+
+      <div class="contenedor-media">
+        <a class="boton" href="https://www.netacad.com/es/">Mi web favorita</a>
+        <img src="https://picsum.photos/300/200" alt="Imagen de prueba">
+      </div>
+
+	<input type="text" id="nombre-usuario" placeholder="Ingresa tu nombre">
+
+      <button class="boton" onclick="mostrarMensaje()">¡Haz clic para ver un saludo!</button>
+      <p id="mensaje-dinamico">Esperando que presiones el botón...</p>
+
+<hr style="margin: 20px 0; border: 0.5px solid #eee;">
+<h3>Dato Curioso del Día (Vía API)</h3>
+<button class="boton" onclick="obtenerDatoCurioso()">Cargar Dato Aleatorio</button>
+<p id="texto-api" style="margin-top: 10px; font-style: italic; color: #333;">Haz clic en el botón para consultar el servidor...</p>
+
+    </div>
+  </main>
+
+  <footer>
+	
+	
+    <p class="footer-text">© 🦆 2026 - Desarrollado por Patricio Hurtado</p>
+ 
+</footer>
+    
+  
+
+  <script>
+   function mostrarMensaje() {
+  let nombre = document.getElementById("nombre-usuario").value;
+
+  if (nombre === "") {
+    document.getElementById("mensaje-dinamico").textContent = "Por favor, ingresa tu nombre primero.";
+    document.getElementById("mensaje-dinamico").style.color = "red";
+  } else {
+    document.getElementById("mensaje-dinamico").textContent = "¡Hola " + nombre + "! Gracias por visitar mi página.";
+    document.getElementById("mensaje-dinamico").style.color = "blue";
+  }
+}
+
+let misHabilidades = [
+  "Crear páginas web con HTML5 y CSS3",
+  "Publicar proyectos en internet con GitHub Pages",
+  "Diseño Adaptativo para celulares (Responsive Design)",
+  "Maquetación avanzada con Flexbox y CSS Grid",
+  "Interactividad y manipulación del DOM con JavaScript"
+];
+
+function cargarHabilidades() {
+  let contenedorLista = document.getElementById("lista-dinamica");
+  contenedorLista.innerHTML = ""; // Limpia la lista
+
+  misHabilidades.forEach(function(habilidad) {
+    contenedorLista.innerHTML += "<li>" + habilidad + "</li>";
+  });
+}
+
+// Ejecutamos la función apenas cargue la página
+cargarHabilidades();
+
+let tareas = ["Revisar configuración de router", "Aprender Backend con Node.js"];
+
+function mostrarTareas() {
+  let contenedorTareas = document.getElementById("lista-tareas");
+  contenedorTareas.innerHTML = "";
+
+  tareas.forEach(function(tarea) {
+    contenedorTareas.innerHTML += "<li>" + tarea + "</li>";
+  });
+}
+
+function agregarTarea() {
+  let inputTarea = document.getElementById("nueva-tarea");
+  let textoTarea = inputTarea.value;
+
+  if (textoTarea === "") {
+    alert("Por favor escribe una tarea antes de agregar.");
+  } else {
+    tareas.push(textoTarea); // Agrega la nueva tarea al arreglo
+    inputTarea.value = "";   // Limpia el cuadro de texto
+    mostrarTareas();         // Actualiza la lista en pantalla
+  }
+}
+
+// Llamamos a la función inicial
+mostrarTareas();
+
+async function obtenerDatoCurioso() {
+  let elementoTexto = document.getElementById("texto-api");
+  elementoTexto.textContent = "Cargando datos desde el servidor...";
+  elementoTexto.style.color = "gray";
+
+  try {
+    // Petición HTTP GET a la API
+    let respuesta = await fetch("https://catfact.ninja/fact");
+    let datos = await respuesta.json();
+
+    // Mostramos el dato recibido del servidor en pantalla
+    elementoTexto.textContent = "💡 " + datos.fact;
+    elementoTexto.style.color = "#0066cc";
+  } catch (error) {
+    elementoTexto.textContent = "Error al conectar con el servidor.";
+    elementoTexto.style.color = "red";
+  }
+}
+
+  </script>
+
+</body>
+</html>
